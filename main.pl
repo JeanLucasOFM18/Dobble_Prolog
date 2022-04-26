@@ -19,7 +19,19 @@ cardsSetNthCard([Y|_], 0, Y).
 cardsSetNthCard([_|Xs], Entero, Card):-
           N is Entero - 1,
           cardsSetNthCard(Xs, N, Card).
-    
+
+cardsSetFindTotalCards(Card, TC) :-
+    largo(Card, N),
+    calculo(N, TC).
+
+largo([], 0).
+
+largo([_|Xs], N) :-
+    largo(Xs, N1), N is N1 + 1.
+
+calculo(N, TC) :-
+    TC is ((N - 1) ** 2) + (N - 1) + 1.
+
 % EJEMPLOS
 
 % cardsSet: cardsSet([a,b,c,d,f,g,h], 3, 3, 92175, CS)
@@ -29,3 +41,5 @@ cardsSetNthCard([_|Xs], Entero, Card):-
 % getSeed: cardsSet([a,b,c,d,f,g,h], 3, 3, 92175, CS), getSeed(CS, Seed)
 
 % cardsSetNthCard: cardsSetNthCard([[A,B],[A,C],[B,C]], 1, C1)
+
+% cardsSetFindTotalCards: cardsSetFindTotalCards([A,B,C], TC)
