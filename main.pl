@@ -1,18 +1,46 @@
-% TDA CARDSSET
+% LAB PROLOG
 
-cardsSet(Elements, NumC, MaxC, Seed, [Elements, NumC, MaxC, Seed]).
+cardsSet(Elements, NumC, MaxC, Seed, CS) :-
+    getElements([Elements, NumC, MaxC, Seed], 0, D1),
+    getNumC([Elements, NumC, MaxC, Seed], 1, D2),
+    getMaxC([Elements, NumC, MaxC, Seed], 1, D3),
+    acortarListaElementos(D1, D2, CS).
 
-getElements([Elements, NumC, MaxC, Seed], Elements) :-
-    cardsSet(Elements, NumC, MaxC, Seed, [Elements, NumC, MaxC, Seed]).
+getElements(Lista, Entero, TC) :-
+    obtenerElemento(Lista, Entero, TC).
 
-getNumC([Elements, NumC, MaxC, Seed], NumC) :-
-    cardsSet(Elements, NumC, MaxC, Seed, [Elements, NumC, MaxC, Seed]).
+getNumC(Lista, Entero, TC) :-
+    obtenerElemento(Lista, Entero, TC).
 
-getMaxC([Elements, NumC, MaxC, Seed], MaxC) :-
-    cardsSet(Elements, NumC, MaxC, Seed, [Elements, NumC, MaxC, Seed]).
+getMaxC(Lista, Entero, TC) :-
+    obtenerElemento(Lista, Entero, TC).
 
-getSeed([Elements, NumC, MaxC, Seed], Seed) :-
-    cardsSet(Elements, NumC, MaxC, Seed, [Elements, NumC, MaxC, Seed]).
+getSeed(Lista, Entero, TC) :-
+    obtenerElemento(Lista, Entero, TC).
+
+acortarListaElementos(D1, D2, L) :-
+    reverse(D1, R1, []),
+    largo(R1, C1),
+    calculo(D2, C2),
+    C3 is C1 - C2,
+    obtenerElementoNecesarios(R1, C3, E1),
+    reverse(E1, L, []).
+
+obtenerElemento([Y|_], 0, Y).
+
+obtenerElemento([_|Xs], Entero, TC):-
+          N is Entero - 1,
+          obtenerElemento(Xs, N, TC).
+
+obtenerElementoNecesarios([_|Y], 0, Y).
+
+obtenerElementoNecesarios([_|Xs], Entero, TC):-
+          N is Entero - 1,
+          obtenerElementoNecesarios(Xs, N, TC).
+                             
+reverse([],Z,Z).
+
+reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).
 
 cardsSetNthCard([Y|_], 0, Y).
 
