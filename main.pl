@@ -4,18 +4,29 @@ cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     getElements([Elements, NumC, MaxC, Seed], 0, D1),
     getNumC([Elements, NumC, MaxC, Seed], 1, D2),
     getMaxC([Elements, NumC, MaxC, Seed], 1, D3),
-    acortarListaElementos(D1, D2, LE).
+    acortarListaElementos(D1, D2, LE),
+    D4 is D2 - 1,
+    firstCard(LE, D4, [], C1),
+    agregarMazo([], C1, CS).
 
+firstCard(0, 0, ListaCa, ListaCa).
 
-firstCard(_, 0, ListaCa, ListaCa).
+firstCard(Lista, 0, ListaCa, CartaInicial) :-
+    obtenerElemento(Lista, 0, Elemento),
+    agregarInicio(Elemento, ListaCa, XD),
+    firstCard(0, 0, XD, CartaInicial).
 
 firstCard(Lista, Num, ListaCa, CartaInicial) :-
     obtenerElemento(Lista, Num, Elemento),
-    agregarFinal(ListaCa, Elemento, XD),
-    write(XD),
-    Num is Num - 1,
-    firstCard(Lista, Num, XD, CartaInicial).
-    
+    agregarInicio(Elemento, ListaCa, XD),
+    Aux is Num - 1,
+    firstCard(Lista, Aux, XD, CartaInicial), !.
+
+agregarMazo(Lista, Carta, Mazo) :-
+    agregarFinal(Lista, Carta, Mazo).
+
+agregarInicio(X, L1, [X|L1]).
+
 agregarFinal([], X, [X]).
 
 agregarFinal([H|T], X, [H|L]) :- agregarFinal(T, X, L).
