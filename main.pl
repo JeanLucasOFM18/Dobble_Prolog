@@ -10,7 +10,9 @@ cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     agregarMazo([], C1, C2),
     D5 is D2 - 1,
     nextCards(LE, D2, 0, [], 1, 0, D5, [], C3),
-    append(C2, C3, CS).
+    append(C2, C3, C4),
+    lastCards(LE, D4, 0, [], 0, 0, 0, D4, [], C5),
+    append(C4, C5, CS).
 
 firstCard(0, 0, ListaCa, ListaCa).
 
@@ -30,7 +32,7 @@ nextCards(_, Num, 0, _, Num, 0, _, Mazo, Mazo).
 nextCards(Lista, Num, _, ListaCa, J, X, X, Carta, Mazo2) :-
     agregarFinal(Carta, ListaCa, Mazo),
     Jnueva is J + 1,
-    nextCards(Lista, Num, 0, [], Jnueva, 0, X, Mazo, Mazo2), !. %OJO CON MAZO
+    nextCards(Lista, Num, 0, [], Jnueva, 0, X, Mazo, Mazo2), !.
 
 nextCards(Lista, Num, 0, ListaCa, J, K, X, Carta, Mazo) :-
     obtenerElemento(Lista, 0, Elemento),
@@ -45,6 +47,30 @@ nextCards(Lista, Num, Aux, ListaCa, J, K, X, Carta, Mazo) :-
     Knueva is K + 1,
     nextCards(Lista, Num, Aux2, XD, J, Knueva, X, Carta, Mazo), !.
 
+lastCards(_, Num, _, _, _, _, Num, _, Mazo, Mazo) :- !.
+
+lastCards(Lista, Num, 0, [], Num, _, I, X, Carta, Mazo) :-
+    Inueva is I + 1,
+    lastCards(Lista, Num, 0, [], 0, 0, Inueva, X, Carta, Mazo), !.
+
+lastCards(Lista, Num, _, ListaCa, J, X, I, X, Carta, Mazo2) :-
+    agregarFinal(Carta, ListaCa, Mazo),
+    Jnueva is J + 1,
+    lastCards(Lista, Num, 0, [], Jnueva, 0, I, X, Mazo, Mazo2), !.
+
+lastCards(Lista, Num, 0, ListaCa, J, K, I, X, Carta, Mazo) :-
+    Inueva is I + 1,
+    obtenerElemento(Lista, Inueva, Elemento),
+    agregarFinal(ListaCa, Elemento, XD),
+    Aux is (Num + 1 + Num * K + (I * K + J) mod Num),
+    lastCards(Lista, Num, Aux, XD, J, K, I, X, Carta, Mazo), !.
+
+lastCards(Lista, Num, Aux, ListaCa, J, K, I, X, Carta, Mazo) :-
+    obtenerElemento(Lista, Aux, Elemento),
+    agregarFinal(ListaCa, Elemento, XD),
+    Knueva is K + 1,
+    Aux2 is (Num + 1 + Num * Knueva + (I * Knueva + J) mod Num),
+    lastCards(Lista, Num, Aux2, XD, J, Knueva, I, X, Carta, Mazo), !.
 
 agregarMazo(Lista, Carta, Mazo) :-
     agregarFinal(Lista, Carta, Mazo).
