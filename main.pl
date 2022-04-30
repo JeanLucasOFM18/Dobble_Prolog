@@ -7,7 +7,10 @@ cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     acortarListaElementos(D1, D2, LE),
     D4 is D2 - 1,
     firstCard(LE, D4, [], C1),
-    agregarMazo([], C1, CS).
+    agregarMazo([], C1, C2),
+    D5 is D2 - 1,
+    nextCards(LE, D2, 0, [], 1, 0, D5, [], C3),
+    append(C2, C3, CS).
 
 firstCard(0, 0, ListaCa, ListaCa).
 
@@ -22,6 +25,27 @@ firstCard(Lista, Num, ListaCa, CartaInicial) :-
     Aux is Num - 1,
     firstCard(Lista, Aux, XD, CartaInicial), !.
 
+nextCards(_, Num, 0, _, Num, 0, _, Mazo, Mazo).
+
+nextCards(Lista, Num, _, ListaCa, J, X, X, Carta, Mazo2) :-
+    agregarFinal(Carta, ListaCa, Mazo),
+    Jnueva is J + 1,
+    nextCards(Lista, Num, 0, [], Jnueva, 0, X, Mazo, Mazo2), !. %OJO CON MAZO
+
+nextCards(Lista, Num, 0, ListaCa, J, K, X, Carta, Mazo) :-
+    obtenerElemento(Lista, 0, Elemento),
+    agregarFinal(ListaCa, Elemento, XD),
+    Aux is ((Num - 1) * J) + (K + 1),
+    nextCards(Lista, Num, Aux, XD, J, K, X, Carta, Mazo), !.
+
+nextCards(Lista, Num, Aux, ListaCa, J, K, X, Carta, Mazo) :-
+    obtenerElemento(Lista, Aux, Elemento),
+    agregarFinal(ListaCa, Elemento, XD),
+    Aux2 is Aux + 1,
+    Knueva is K + 1,
+    nextCards(Lista, Num, Aux2, XD, J, Knueva, X, Carta, Mazo), !.
+
+
 agregarMazo(Lista, Carta, Mazo) :-
     agregarFinal(Lista, Carta, Mazo).
 
@@ -30,12 +54,6 @@ agregarInicio(X, L1, [X|L1]).
 agregarFinal([], X, [X]).
 
 agregarFinal([H|T], X, [H|L]) :- agregarFinal(T, X, L).
-
-recorreOracion([]).
-
-recorreOracion([Cabeza|Cola]) :-
-    write(Cabeza),nl,
-    recorreOracion(Cola).
 
 getElements(Lista, Entero, TC) :-
     obtenerElemento(Lista, Entero, TC).
