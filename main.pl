@@ -117,14 +117,14 @@ reverse([],Z,Z).
 
 reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).
 
-%FUNCIÓN 2
+%FUNCIÓN 2 SIN TERMINAR
 
 cardsSetlsDobble(Lista, C) :-
     mkset(Lista, C),
     largo(C, N),
     N = 3.
 
-% FUNCIÓN 3
+% FUNCIÓN 3 LISTA
 
 cardsSetNthCard([Y|_], 0, Y).
 
@@ -132,11 +132,24 @@ cardsSetNthCard([_|Xs], Entero, Card):-
           N is Entero - 1,
           cardsSetNthCard(Xs, N, Card).
 
-% FUNCIÓN 4
+% FUNCIÓN 4 LISTA
 
 cardsSetFindTotalCards(Card, TC) :-
     largo(Card, N),
     calculo(N, TC).
+
+% FUNCIÓN 5 SIN TERMINAR
+
+cardsSetMissingCards(SetCartas, CS) :-
+    obtenerElemento(SetCartas, 0, Carta),
+    largo(Carta, Tamanio),
+    calculo(Tamanio, CantCartas),
+    largo(SetCartas, LargoMazo),
+    comprueba(SetCartas, CantCartas, LargoMazo, CS).
+
+comprueba(_, CantCartas, CantCartas, []).
+
+% EXTRAS
 
 largo([], 0).
 
@@ -153,3 +166,5 @@ calculo(N, TC) :-
 % cardsSetNthCard: cardsSetNthCard([[A,B],[A,C],[B,C]], 1, C1)
 
 % cardsSetFindTotalCards: cardsSetFindTotalCards([A,B,C], TC)
+
+% cardsSet([a,b,c,d,e,f,g,h,i,j,k,l], 3, 3, 92175, CS), cardsSetNthCard(CS, 2, C2), cardsSetFindTotalCards(C2, TC).
