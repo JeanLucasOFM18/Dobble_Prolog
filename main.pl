@@ -126,8 +126,7 @@ cardsSetlsDobble(SetCartas) :-
     largo(SetCartas, LargoMazo),
     CantCartas == LargoMazo,
     seleccionCartas(SetCartas, 0, 1, CantCartas, 0, Contador),
-    Contador == 1,
-    write(true).
+    Contador == 1.
 
 seleccionCartas(_, _, _, 1, ContadorAux, ContadorAux).
 
@@ -155,17 +154,18 @@ esValida(_, _, _, _, ContadorAux, Contador) :-
     
 miembro(H,[H|_]).
                     
-miembro(H,[_|T]):-miembro(H,T).
+miembro(H,[_|T]):-
+    miembro(H,T).
 
-intersecta([],_,0):-!.
+intersecta([],_,0):- !.
 
-intersecta([H|T],L2,Count):-
-    miembro(H,L2),
-    intersecta(T,L2,CountAux),
+intersecta([H|T], L2, Count):-
+    miembro(H, L2),
+    intersecta(T, L2, CountAux),
     Count is CountAux + 1, !.
 
-intersecta([_|T],L2,Count):-
-    intersecta(T,L2,Count).
+intersecta([_|T], L2, Count):-
+    intersecta(T, L2, Count).
 
 % FUNCIÓN 3 LISTA
 
@@ -181,16 +181,79 @@ cardsSetFindTotalCards(Card, TC) :-
     largo(Card, N),
     calculo(N, TC).
 
-% FUNCIÓN 5 SIN TERMINAR
+% FUNCIÓN 5 LISTA
 
 cardsSetMissingCards(SetCartas, CS) :-
     obtenerElemento(SetCartas, 0, Carta),
     largo(Carta, Tamanio),
     calculo(Tamanio, CantCartas),
     largo(SetCartas, LargoMazo),
-    comprueba(SetCartas, CantCartas, LargoMazo, CS).
+    comprueba(SetCartas, CantCartas, LargoMazo, L1),
+    largo(L1, Tamanio2),
+    CantCartas == Tamanio2,
+    formarMazoMissingCards(L1, Tamanio, L2),
+    missingCards(SetCartas, L2, CantCartas, LargoMazo, 0, 0, LargoMazo, 0, [], CS).
 
 comprueba(_, CantCartas, CantCartas, []).
+
+comprueba(SetCartas, _, LargoMazo, CS) :-
+    obtenerListaElementos(SetCartas, 0, LargoMazo, [], CS).
+
+obtenerListaElementos(_, LargoMazo, LargoMazo, Lista, Lista).
+
+obtenerListaElementos(SetCartas, N, LargoMazo, Lista, CS) :-
+    obtenerElemento(SetCartas,  N, Elementos),
+    append(Lista, Elementos, L1),
+    Nnueva is N + 1,
+    obtenerListaElementos(SetCartas, Nnueva, LargoMazo, L1, E1),
+    eliminaDuplicados(E1, CS).
+
+eliminaDuplicados([], [], _).
+
+eliminaDuplicados([T|C], S, D) :- 
+    eliminaDuplicados(C,Z,[T|D]), ((miembro(T,D), S=Z,!) ; S=[T|Z]).
+
+eliminaDuplicados(L, S) :- 
+    eliminaDuplicados(L,S,[]).
+
+formarMazoMissingCards(Lista, Tamanio, CS) :-
+    Tamanio2 is Tamanio - 1,
+    firstCard(Lista, Tamanio2, [], C1),
+    agregarMazo([], C1, C2),
+    nextCards(Lista, Tamanio, 0, [], 1, 0, Tamanio2, [], C3),
+    append(C2, C3, C4),
+    lastCards(Lista, Tamanio2, 0, [], 0, 0, 0, Tamanio2, [], C5),
+    append(C4, C5, CS).
+
+missingCards(_, _, CantCartas, _, _, _, CantCartas, _, Lista, Lista).
+
+missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, LargoMazo, Num3, 0, Lista, CS) :-
+    obtenerElemento(MazoCreado, Num, E1),
+    agregarFinal(Lista, E1, Cartas),
+    LargoMazoNuevo is Num3 + 1,
+    Numnuevo is Num + 1,
+    missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Numnuevo, 0, LargoMazoNuevo, 0, Cartas, CS), !.
+
+missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, LargoMazo, Num3, 3, Lista, CS) :-
+    Numnuevo is Num + 1,
+    missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Numnuevo, 0, Num3, 0, Lista, CS), !.
+
+missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, Num2, Num3, Aux, Lista, CS) :-
+    obtenerElemento(MazoCreado, Num, E1),
+    obtenerElemento(MazoOriginal, Num2, E2),
+    comparaCartasMissing(MazoOriginal, MazoCreado, E1, E2, CantCartas, LargoMazo, Num, Num2, Num3, Aux, Lista, CS), !.
+
+comparaCartasMissing(MazoOriginal, MazoCreado, E1, E2, CantCartas, LargoMazo, Num, Num2, Num3, Aux, Lista, CS) :-
+    intersecta(E1, E2, Contador),
+    compruebaMazo(MazoOriginal, MazoCreado, Contador, CantCartas, LargoMazo, Num, Num2, Num3, Aux, Lista, CS), !.
+
+compruebaMazo(MazoOriginal, MazoCreado, 3, CantCartas, LargoMazo, Num, Num2, Num3, _, Lista, CS) :-
+    Num2nuevo is Num2 + 1,
+    missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, Num2nuevo, Num3, 3, Lista, CS), !.
+
+compruebaMazo(MazoOriginal, MazoCreado, _, CantCartas, LargoMazo, Num, Num2, Num3, Aux, Lista, CS) :-
+    Num2nuevo is Num2 + 1,
+    missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, Num2nuevo, Num3, Aux, Lista, CS), !.
 
 % EXTRAS
 
@@ -202,12 +265,6 @@ largo([_|Xs], N) :-
 calculo(N, TC) :-
     TC is ((N - 1) ** 2) + (N - 1) + 1.
 
-% EJEMPLOS
+% EJEMPLOS (PRONTO SE AGREGARÁN EJEMPLOS)
 
 % cardsSet: cardsSet([a,b,c,d,e,f,g,h,i,j,k,l], 3, 3, 92175, CS)
-
-% cardsSetNthCard: cardsSetNthCard([[A,B],[A,C],[B,C]], 1, C1)
-
-% cardsSetFindTotalCards: cardsSetFindTotalCards([A,B,C], TC)
-
-% cardsSet([a,b,c,d,e,f,g,h,i,j,k,l], 3, 3, 92175, CS), cardsSetNthCard(CS, 2, C2), cardsSetFindTotalCards(C2, TC).
