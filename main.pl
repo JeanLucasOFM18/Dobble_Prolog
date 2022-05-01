@@ -117,12 +117,55 @@ reverse([],Z,Z).
 
 reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).
 
-%FUNCIÓN 2 SIN TERMINAR
+%FUNCIÓN 2 LISTA
 
-cardsSetlsDobble(Lista, C) :-
-    mkset(Lista, C),
-    largo(C, N),
-    N = 3.
+cardsSetlsDobble(SetCartas) :-
+    obtenerElemento(SetCartas, 0, Carta),
+    largo(Carta, Tamanio),
+    calculo(Tamanio, CantCartas),
+    largo(SetCartas, LargoMazo),
+    CantCartas == LargoMazo,
+    seleccionCartas(SetCartas, 0, 1, CantCartas, 0, Contador),
+    Contador == 1,
+    write(true).
+
+seleccionCartas(_, _, _, 1, ContadorAux, ContadorAux).
+
+seleccionCartas(SetCartas, N, X, X, ContadorAux, Contador) :-
+    Nnueva is N + 1,
+    N1nueva is Nnueva + 1,
+    Xnueva is X - 1,
+    seleccionCartas(SetCartas, Nnueva, N1nueva, Xnueva, ContadorAux, Contador), !.
+
+seleccionCartas(SetCartas, N, N1, X, ContadorAux, Contador) :-
+    obtenerElemento(SetCartas, N, C1),
+    obtenerElemento(SetCartas, N1, C2),
+    comparaCartas(SetCartas, N, N1, X, C1, C2, ContadorAux, Contador), !.
+
+comparaCartas(SetCartas, N, N1, X, C1, C2, _, Contador) :-
+    intersecta(C1, C2, ContadorAux2),
+    esValida(SetCartas, N, N1, X, ContadorAux2, Contador), !.
+
+esValida(SetCartas, N, N1, X, 1, Contador) :-
+    N1nueva is N1 + 1,
+    seleccionCartas(SetCartas, N, N1nueva, X, 1, Contador), !.
+
+esValida(_, _, _, _, ContadorAux, Contador) :-
+    seleccionCartas(_, _, _, 1, ContadorAux, Contador).
+    
+miembro(H,[H|_]).
+                    
+miembro(H,[_|T]):-miembro(H,T).
+
+intersecta([],_,0):-!.
+
+intersecta([H|T],L2,Count):-
+    miembro(H,L2),
+    intersecta(T,L2,CountAux),
+    Count is CountAux + 1, !.
+
+intersecta([_|T],L2,Count):-
+    intersecta(T,L2,Count).
 
 % FUNCIÓN 3 LISTA
 
