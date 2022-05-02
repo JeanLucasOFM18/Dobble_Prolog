@@ -1,9 +1,10 @@
 % LAB PROLOG
 
+% TDA CARDSSET
 cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     getElements([Elements, NumC, MaxC, Seed], 0, D1),
     getNumC([Elements, NumC, MaxC, Seed], 1, D2),
-    getMaxC([Elements, NumC, MaxC, Seed], 1, D3),
+    getMaxC([Elements, NumC, MaxC, Seed], 2, D3),
     acortarListaElementos(D1, D2, LE),
     D4 is D2 - 1,
     firstCard(LE, D4, [], C1),
@@ -255,7 +256,80 @@ compruebaMazo(MazoOriginal, MazoCreado, _, CantCartas, LargoMazo, Num, Num2, Num
     Num2nuevo is Num2 + 1,
     missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, Num2nuevo, Num3, Aux, Lista, CS), !.
 
-% EXTRAS
+% FUNCIÓN 6 NO TERMINADA
+
+cardsSetToString(Mazo, String) :-
+    atomics_to_string(Mazo , "," , String).
+
+% TDA GAME
+
+dobbleGame(NumPlayers, CS, Mode, Seed, Game) :-
+    getNumPlayers([NumPlayers, CS, Mode, Seed], D1),
+    getCS([NumPlayers, CS, Mode, Seed], D2),
+    getMode([NumPlayers, CS, Mode, Seed], D3),
+    getSeed2([NumPlayers, CS, Mode, Seed], D4),
+    agregarFinal([], D1, L1),
+    agregarFinal(L1, D2, L2),
+    agregarFinal(L2, D3, L3),
+    agregarFinal(L3, D4, L4),
+    append([L4], [[]], Game).
+    
+getNumPlayers(Lista, TC) :-
+    obtenerElemento(Lista, 0, TC).
+
+getCS(Lista, TC) :-
+    obtenerElemento(Lista, 1, TC).
+
+getMode(Lista, TC) :-
+    obtenerElemento(Lista, 2, TC).
+
+getSeed2(Lista, TC) :-
+    obtenerElemento(Lista, 3, TC).
+
+% FUNCIÓN 7 LISTA
+
+dobbleGameRegister(User, GameIn, GameOut) :-
+    obtenerElemento(GameIn, 0, D1),
+    getNumPlayers(D1, N),
+    obtenerElemento(GameIn, 1, D2),
+    largo(D2, N1),
+    N1 < N,
+    register(D2, GameIn, User, N1, 0, GameOut).
+
+register(Game, GameIn, User, 0, _, GameOut) :-
+    agregarFinal(Game, User, D1),
+    eliminarLista(1, GameIn, L1),
+    agregarFinal(L1, D1, GameOut), !.
+
+register(Game, GameIn, User, N, X, GameOut) :-
+    compararUsuarios(User, Game, N, X),
+    X == 0,
+    agregarFinal(Game, User, D1),
+    eliminarLista(1, GameIn, L1),
+    agregarFinal(L1, D1, GameOut), !.
+
+compararUsuarios(_, _, 0, 0).
+
+compararUsuarios(User, Game, N, _) :-
+    Naux is N - 1,
+    obtenerElemento(Game, Naux, L1),
+    stringAtom(L1, UserAtom),
+    stringAtom(User, UserAtom2),
+    UserAtom \== UserAtom2,
+    Nnueva is N - 1,
+    compararUsuarios(User, Game, Nnueva, 0), !. 
+    
+stringAtom(X, Y) :-
+    atom_string(Y, X).
+
+insertaIdx(X, 0, L1, [X|L1]).
+
+insertaIdx(X, Pos, [C|R], [C|R2]) :-
+    Pos1 is Pos - 1,
+    insertaIdx(X, Pos1, R, R2).
+
+eliminarLista(Posicion, L, L1) :-
+    insertaIdx(_, Posicion, L1, L).
 
 largo([], 0).
 
