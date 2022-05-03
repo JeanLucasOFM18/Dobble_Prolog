@@ -289,6 +289,10 @@ getSeed2(Lista, TC) :-
 % FUNCIÓN 7 LISTA
 
 dobbleGameRegister(User, GameIn, GameOut) :-
+    ((is_list(GameIn), Y = 0); (is_list(GameOut), Y = 1)),
+    determinarFuncion(User, GameIn, GameOut, Y).
+
+determinarFuncion(User, GameIn, GameOut, 0) :-
     obtenerElemento(GameIn, 0, D1),
     getNumPlayers(D1, N),
     obtenerElemento(GameIn, 1, D2),
@@ -296,6 +300,18 @@ dobbleGameRegister(User, GameIn, GameOut) :-
     N1 < N,
     register(D2, GameIn, User, N1, 0, GameOut).
 
+determinarFuncion(Usuario, GameIn, GameOut, 1) :-
+    obtenerElemento(GameOut, 1, D1),
+    largo(D1, N),
+    Neliminada is N - 1,
+    obtenerElemento(D1, Neliminada, UltUsuario),
+    stringAtom(UltUsuario, UserAtom),
+    stringAtom(Usuario, UserAtom2),
+    UserAtom == UserAtom2,
+    eliminarLista(Neliminada, D1, D2),
+    eliminarLista(1, GameOut, D3),
+    agregarFinal(D3, D2, GameIn).
+    
 register(Game, GameIn, User, 0, _, GameOut) :-
     agregarFinal(Game, User, D1),
     eliminarLista(1, GameIn, L1),
