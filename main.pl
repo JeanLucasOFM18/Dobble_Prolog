@@ -272,7 +272,8 @@ dobbleGame(NumPlayers, CS, Mode, Seed, Game) :-
     agregarFinal(L1, D2, L2),
     agregarFinal(L2, D3, L3),
     agregarFinal(L3, D4, L4),
-    append([L4], [[]], Game).
+    append([L4], [[]], L5),
+    append(L5, [[0]], Game).
     
 getNumPlayers(Lista, TC) :-
     obtenerElemento(Lista, 0, TC).
@@ -310,21 +311,21 @@ determinarFuncion(Usuario, GameIn, GameOut, 1) :-
     UserAtom == UserAtom2,
     eliminarLista(Neliminada, D1, D2),
     eliminarLista(1, GameOut, D3),
-    agregarFinal(D3, D2, GameIn).
+    insertar(D2, D3, 2, GameIn).
     
 register(Game, GameIn, User, 0, _, GameOut) :-
     agregarFinal(Game, User, D1),
     eliminarLista(1, GameIn, L1),
-    agregarFinal(L1, D1, GameOut), !.
+    insertar(D1, L1, 2, GameOut), !.
 
 register(Game, GameIn, User, N, X, GameOut) :-
     compararUsuarios(User, Game, N, X),
     X == 0,
     agregarFinal(Game, User, D1),
     eliminarLista(1, GameIn, L1),
-    agregarFinal(L1, D1, GameOut), !.
+    insertar(D1, L1, 2, GameOut), !.
 
-compararUsuarios(_, _, 0, 0).
+compararUsuarios(_, _, 1, 0).
 
 compararUsuarios(User, Game, N, _) :-
     Naux is N - 1,
@@ -354,6 +355,33 @@ largo([_|Xs], N) :-
 
 calculo(N, TC) :-
     TC is ((N - 1) ** 2) + (N - 1) + 1.
+
+% FUNCIÓN 8
+
+dobbleGameWhoseTurnIsIt(Game, Username) :-
+    ((string(Username), X = 0) ; (is_list(Game), X = 1)),
+    defineFuncionTurn(Game, Username, X), !.
+
+defineFuncionTurn(Game, Username, 0) :-
+    obtenerElemento(Game, 2, Turno),
+    obtenerElemento(Turno, 0, Num),
+    obtenerElemento(Game, 1, Jugadores),
+    obtenerElemento(Jugadores, Num, User),
+    stringAtom(User, UserAtom),
+    stringAtom(Username, UserAtom2),
+    UserAtom == UserAtom2, !.
+
+defineFuncionTurn(Game, Username, 1) :-
+    obtenerElemento(Game, 2, Turno),
+    obtenerElemento(Turno, 0, Num),
+    obtenerElemento(Game, 1, Jugadores),
+    obtenerElemento(Jugadores, Num, Username), !.
+
+insertar(El, L, 1, [El | L]).
+
+insertar(El, [G | R], P, [G | Res]):-
+	P1 is P - 1,
+	insertar(El, R, P1, Res).
 
 % EJEMPLOS (PRONTO SE AGREGARÁN EJEMPLOS)
 
