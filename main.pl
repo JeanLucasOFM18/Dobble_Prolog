@@ -256,10 +256,35 @@ compruebaMazo(MazoOriginal, MazoCreado, _, CantCartas, LargoMazo, Num, Num2, Num
     Num2nuevo is Num2 + 1,
     missingCards(MazoOriginal, MazoCreado, CantCartas, LargoMazo, Num, Num2nuevo, Num3, Aux, Lista, CS), !.
 
-% FUNCIÓN 6 NO TERMINADA
+% FUNCIÓN 6 LISTA
 
-cardsSetToString(Mazo, String) :-
-    atomics_to_string(Mazo , "," , String).
+cardsSetToString(CardsSet, String) :-
+    largo(CardsSet, N),
+    stringCartas(CardsSet, N, 0, _, String).
+
+stringCartas(_, N, N, StringAux, StringAux).
+
+stringCartas(CardsSet, N, 0, _, String) :-
+    obtenerElemento(CardsSet, 0, Carta),
+    atomics_to_string(Carta, ",", CartaString),
+    stringAtom(Numero, 1),
+    string_concat(Numero, ": ", Aux),
+    string_concat("Carta ", Aux, Aux2),
+    string_concat(Aux2, CartaString, StringResultado),
+    stringCartas(CardsSet, N, 1, StringResultado, String), !.
+
+stringCartas(CardsSet, N, X, StringAux, String) :-
+    obtenerElemento(CardsSet, X, Carta),
+    atomics_to_string(Carta, ",", CartaString),
+    X1 is X + 1,
+    stringAtom(Numero, X1),
+    string_concat(Numero, ": ", Aux),
+    string_concat("Carta ", Aux, Aux2),
+    string_concat(Aux2, CartaString, StringAct),
+    string_concat(StringAux, " | ", StringAct2),
+    string_concat(StringAct2, StringAct, StringResultado),
+    stringCartas(CardsSet, N, X1, StringResultado, String), !.
+    
 
 % TDA GAME
 
