@@ -276,7 +276,8 @@ dobbleGame(NumPlayers, CS, Mode, Seed, Game) :-
     append(L5, [[0]], L6),
     append(L6, [[]], L7),
     append(L7, [[]], L8),
-    cantidadPuntajes(L8, D1, Game).
+    append(L8, [["Juego no Iniciado"]], L9),
+    cantidadPuntajes(L9, D1, Game).
     
 getNumPlayers(Lista, TC) :-
     obtenerElemento(Lista, 0, TC).
@@ -410,7 +411,9 @@ insertar(El, [G | R], P, [G | Res]):-
 
 dobbleGamePlay(Game, Action, GameOut) :-
     ((is_list(Action), X = 1) ; (Action == null, X = 0) ; (Action == pass, X = 2) ; (Action == finish, X = 3)),
-    ejecutarJuego(Game, Action, X, GameOut).
+    ejecutarJuego(Game, Action, X, GameAct),
+    ((X == 3, eliminarLista(5, GameAct, GameAct2), insertar(["Terminado"], GameAct2, 6, GameOut)) ;
+    (X \== 3, eliminarLista(5, GameAct, GameAct2), insertar(["Jugando"], GameAct2, 6, GameOut))).
 
 ejecutarJuego(Game, _, 0, GameOut) :-
     obtenerElemento(Game, 0, D1),
@@ -444,7 +447,7 @@ ejecutarJuego(Game, _, 3, GameOut) :-
     largo(Puntajes, N),
     listaMax(PtsGanador, Puntajes),
     obtenerGanadores(Puntajes, Jugadores, PtsGanador, N, 0, [], Ganadores),
-    insertar(Ganadores, Game, 6, GameOut).
+    insertar(Ganadores, Game, 7, GameOut).
 
 obtenerGanadores(_, _, _, N, N, ListaGanadores, ListaGanadores).
 
@@ -614,7 +617,9 @@ quedanCartas(Game, N, CS, GameOut) :-
 
 % FUNCIÓN 10
 
-dobbleGameStatus(Game, Status).
+dobbleGameStatus(Game, Status) :-
+    obtenerElemento(Game, 5, Estado),
+    obtenerElemento(Estado, 0, Status).
 
 % FUNCIÓN 11
 
