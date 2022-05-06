@@ -623,7 +623,31 @@ dobbleGameStatus(Game, Status) :-
 
 % FUNCIÓN 11
 
-dobbleGameScore(Game, Username, Score).
+dobbleGameScore(Game, Username, Score) :-
+    obtenerElemento(Game, 4, Puntajes),
+    obtenerElemento(Game, 1, Jugadores),
+    largo(Jugadores, N),
+    stringAtom(Username, UserAtom),
+    verificarRegistro(Jugadores, UserAtom, N, 0, _, Resultado),
+    Resultado == 1,
+    ubicarUsuario(Jugadores, UserAtom, N, 0, 0, Posicion),
+    obtenerElemento(Puntajes, Posicion, Score).
+    
+ubicarUsuario(_, _, N, N, Registro, Registro).
+
+ubicarUsuario(Jugadores, UserAtom, N, X, Registro, Posicion) :-
+    obtenerElemento(Jugadores, X, Jugador),
+    stringAtom(Jugador, UserAtom2),
+    ((UserAtom == UserAtom2, ubicarUsuario(Jugadores, UserAtom, N, N, Registro, Posicion)) ;
+    (UserAtom \== UserAtom2, R1 is Registro + 1, X1 is X + 1, ubicarUsuario(Jugadores, UserAtom, N, X1, R1, Posicion))).
+    
+verificarRegistro(_, _, N, N, Registro, Registro).
+
+verificarRegistro(Jugadores, UserAtom, N, X, _, Score) :-
+    obtenerElemento(Jugadores, X, Jugador),
+    stringAtom(Jugador, UserAtom2),
+    ((UserAtom == UserAtom2, verificarRegistro(Jugadores, UserAtom, N, N, 1, Score)) ;
+    (UserAtom \== UserAtom2, X1 is X + 1, verificarRegistro(Jugadores, UserAtom, N, X1, 0, Score))).
     
 % EJEMPLOS (PRONTO SE AGREGARÁN EJEMPLOS)
 
