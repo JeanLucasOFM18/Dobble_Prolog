@@ -273,7 +273,10 @@ dobbleGame(NumPlayers, CS, Mode, Seed, Game) :-
     agregarFinal(L2, D3, L3),
     agregarFinal(L3, D4, L4),
     append([L4], [[]], L5),
-    append(L5, [[0]], Game).
+    append(L5, [[0]], L6),
+    append(L6, [[]], L7),
+    append(L7, [[]], L8),
+    cantidadPuntajes(L8, D1, Game).
     
 getNumPlayers(Lista, TC) :-
     obtenerElemento(Lista, 0, TC).
@@ -287,6 +290,26 @@ getMode(Lista, TC) :-
 getSeed2(Lista, TC) :-
     obtenerElemento(Lista, 3, TC).
 
+cantidadPuntajes(L8, 0, L8).
+
+cantidadPuntajes(L8, N, L9) :-
+    obtenerElemento(L8, 4, Puntajes),
+    agregarFinal(Puntajes, 0, P1),
+    eliminarLista(4, L8, GameAct),
+    insertar(P1, GameAct, 5, G1),
+    N1 is N - 1,
+    cantidadPuntajes(G1, N1, L9), !.
+
+cartasPorUsuario(L10, 0, L10).
+
+cartasPorUsuario(L10, N, Game) :-
+    obtenerElemento(L10, 5, CartaUsuarios),
+    agregarFinal(CartaUsuarios, [], P1),
+    eliminarLista(5, L10, GameAct),
+    insertar(P1, GameAct, 6, G1),
+    N1 is N - 1,
+    cartasPorUsuario(G1, N1, Game), !.
+    
 % FUNCIÓN 7 LISTA
 
 dobbleGameRegister(User, GameIn, GameOut) :-
@@ -383,6 +406,220 @@ insertar(El, [G | R], P, [G | Res]):-
 	P1 is P - 1,
 	insertar(El, R, P1, Res).
 
+% FUNCIÓN 9
+
+dobbleGamePlay(Game, Action, GameOut) :-
+    ((is_list(Action), X = 1) ; (Action == null, X = 0) ; (Action == pass, X = 2) ; (Action == finish, X = 3)),
+    ejecutarJuego(Game, Action, X, GameOut).
+
+ejecutarJuego(Game, _, 0, GameOut) :-
+    obtenerElemento(Game, 0, D1),
+    obtenerElemento(D1, 1, CS),
+    largo(CS, N),
+    quedanCartas(Game, N, CS, GameOut).
+
+ejecutarJuego(Game, Action, 1, GameOut) :-
+    obtenerElemento(Action, 1, Usuario),
+    obtenerElemento(Action, 2, Elemento),
+    obtenerElemento(Game, 2, Dato),
+    obtenerElemento(Dato, 0, Turno),
+    obtenerElemento(Game, 1, UsuariosRegistrados),
+    obtenerElemento(UsuariosRegistrados, Turno, UsuarioTurno),
+    stringAtom(Usuario, UserAtom),
+    stringAtom(UsuarioTurno, UserAtom2),
+    UserAtom == UserAtom2,
+    verificarElemento(Game, Elemento, GameOut).
+    
+ejecutarJuego(Game, _, 2, GameOut) :-
+    obtenerElemento(Game, 2, Turno),
+    obtenerElemento(Turno, 0, N),
+    obtenerElemento(Game, 0, D),
+    obtenerElemento(D, 0, N1),
+    N2 is N1 - 1,
+    turnoCompletado(Game, N, N2, GameOut), !.
+
+ejecutarJuego(Game, _, 3, GameOut) :-
+    obtenerElemento(Game, 4, Puntajes),
+    obtenerElemento(Game, 1, Jugadores),
+    largo(Puntajes, N),
+    listaMax(PtsGanador, Puntajes),
+    obtenerGanadores(Puntajes, Jugadores, PtsGanador, N, 0, [], Ganadores),
+    insertar(Ganadores, Game, 6, GameOut).
+
+obtenerGanadores(_, _, _, N, N, ListaGanadores, ListaGanadores).
+
+obtenerGanadores(Puntajes, Jugadores, PtsGanador, N, X, ListaGanadores, GameOut) :-
+    obtenerElemento(Puntajes, X, PtsUsuario),
+    ((PtsUsuario == PtsGanador, Y = 1) ; (PtsUsuario \== PtsGanador, Y = 0)),
+    ganadores(Puntajes, Jugadores, PtsGanador, N, X, ListaGanadores, Y, GameOut).
+
+ganadores(Puntajes, Jugadores, PtsGanador, N, X, ListaGanadores, 0, GameOut) :-
+    X1 is X + 1,
+    obtenerGanadores(Puntajes, Jugadores, PtsGanador, N, X1, ListaGanadores, GameOut).
+
+ganadores(Puntajes, Jugadores, PtsGanador, N, X, ListaGanadores, 1, GameOut) :-
+    obtenerElemento(Jugadores, X, Jugador),
+    agregarFinal(ListaGanadores, Jugador, ListaAct),
+    X1 is X + 1,
+    obtenerGanadores(Puntajes, Jugadores, PtsGanador, N, X1, ListaAct, GameOut).
+    
+listaMax(M, [X|Xs]):-
+          listaMax2(M, X, Xs).
+
+listaMax2(M, M, []):- !.
+
+listaMax2(X, Y, [Z|Zs]):-
+          Z >= Y,
+          !,
+          listaMax2(X, Z, Zs).
+
+listaMax2(X, Y, [Z|Zs]):-
+          Z =< Y,
+          listaMax2(X, Y, Zs).
+
+verificarElemento(Game, Elemento, GameOut) :-
+    obtenerElemento(Game, 3, Mesa),
+    obtenerElemento(Mesa, 0, C1),
+    obtenerElemento(Mesa, 1, C2),
+    largo(C1, N),
+    compruebaElemento(C1, C2, N, 0, 0, Elemento, ER),
+    obtenerRepetido(C1, ER, Repetido),
+    ((Elemento == Repetido, X = 0) ; (Elemento \== Repetido, X = 1)),
+    modificaPuntaje(Game, X, GameOut).
+
+modificaPuntaje(Game, 1, GameOut) :-
+    obtenerElemento(Game, 3, Mesa),
+    obtenerElemento(Game, 0, Datos),
+    obtenerElemento(Datos, 1, Mazo),
+    devolverCartas(Mesa, 0, Mazo, MazoNuevo),
+    eliminarLista(1, Datos, Datos2),
+    insertar(MazoNuevo, Datos2, 2, DatosNuevos),
+    eliminarLista(0, Game, GameAct),
+    insertar(DatosNuevos, GameAct, 1, GameAct2),
+    eliminarLista(3, GameAct2, GameAct3),
+    insertar([], GameAct3, 4, GameAct4),
+    obtenerElemento(Datos, 0, CantJugadores),
+    obtenerElemento(Game, 2, DatoTurnos),
+    obtenerElemento(DatoTurnos, 0, Turno),
+    Cant is CantJugadores - 1,
+    verificaTurno(GameAct4, Cant, Turno, GameOut).
+
+modificaPuntaje(Game, 0, GameOut) :-
+    obtenerElemento(Game, 2, Dato),
+    obtenerElemento(Dato, 0, Turno),
+    obtenerElemento(Game, 4, Puntajes),
+    obtenerElemento(Puntajes, Turno, PuntajeUsuario),
+    PuntajeNuevo is PuntajeUsuario + 2,
+    eliminarLista(Turno, Puntajes, Puntajes2),
+    TurnoNuevo is Turno + 1,
+    insertar(PuntajeNuevo, Puntajes2, TurnoNuevo, PuntajesAct),
+    eliminarLista(4, Game, Game2),
+    insertar(PuntajesAct, Game2, 5, GameAct),
+    eliminarLista(3, GameAct, GameAct2),
+    insertar([], GameAct2, 4, GameAct3),
+    obtenerElemento(Game, 0, Datos),
+    obtenerElemento(Datos, 0, CantJugadores),
+    Cant is CantJugadores - 1,
+    verificaTurno(GameAct3, Cant, Turno, GameOut).
+
+verificaTurno(Game, Cant, Cant, GameOut) :-
+    eliminarLista(2, Game, Game2),
+    agregarFinal([], 0, TurnoAct),
+    insertar(TurnoAct, Game2, 3, GameOut).
+
+verificaTurno(Game, Cant, Turno, GameOut) :-
+    obtenerElemento(Game, 2, Dato),
+    obtenerElemento(Dato, 0, Turno),
+    TurnoNuevo is Turno + 1,
+    eliminarLista(2, Game, Game2),
+    agregarFinal([], TurnoNuevo, TurnoAct),
+    insertar(TurnoAct, Game2, 3, GameOut).
+    
+obtenerRepetido(_, 0, null).
+
+obtenerRepetido(C1, ER, GameOut) :-
+    ER1 is ER - 1,
+    obtenerElemento(C1, ER1, GameOut).
+    
+compruebaElemento(_, _, _, N1, 1, _, N1).
+
+compruebaElemento(_, _, N, N, _, _, 0).
+
+compruebaElemento(C1, C2, N, N1, 0, Elemento, ER) :-
+    obtenerElemento(C1, N1, E1),
+    ((member(E1, C2), X = 1) ; (not(member(E1, C2)), X = 0)),
+    Aux is N1 + 1,
+    compruebaElemento(C1, C2, N, Aux, X, Elemento, ER).
+    
+turnoCompletado(Game, N2, N2, GameOut) :-
+    obtenerElemento(Game, 3, Mesa),
+    obtenerElemento(Game, 0, Datos),
+    obtenerElemento(Datos, 1, Mazo),
+    devolverCartas(Mesa, 0, Mazo, MazoNuevo),
+    eliminarLista(1, Datos, Datos2),
+    insertar(MazoNuevo, Datos2, 2, DatosNuevos),
+    eliminarLista(0, Game, GameAct),
+    insertar(DatosNuevos, GameAct, 1, GameAct2),
+    agregarFinal([], 0, Turno),
+    eliminarLista(2, GameAct2, TurnoCambiar),
+    insertar(Turno, TurnoCambiar, 3, GameAct3),
+    eliminarLista(3, GameAct3, GameAct4),
+    insertar([], GameAct4, 4, GameOut), !.
+
+turnoCompletado(Game, N, N2, GameOut) :-
+    obtenerElemento(Game, 3, Mesa),
+    obtenerElemento(Game, 0, Datos),
+    obtenerElemento(Datos, 1, Mazo),
+    devolverCartas(Mesa, 0, Mazo, MazoNuevo),
+    eliminarLista(1, Datos, Datos2),
+    insertar(MazoNuevo, Datos2, 2, DatosNuevos),
+    eliminarLista(0, Game, GameAct),
+    insertar(DatosNuevos, GameAct, 1, GameAct2),
+    N1 is N + 1,
+    agregarFinal([], N1, Turno),
+    eliminarLista(2, GameAct2, TurnoCambiar),
+    insertar(Turno, TurnoCambiar, 3, GameAct3),
+    eliminarLista(3, GameAct3, GameAct4),
+    insertar([], GameAct4, 4, GameOut), !.
+
+devolverCartas(_, 2, Mazo, Mazo).
+   
+devolverCartas(Mesa, N, Mazo, CS) :-
+    obtenerElemento(Mesa, N, Carta),
+    insertar(Carta, Mazo, 1, Mnuevo),
+    Nnueva is N + 1,
+    devolverCartas(Mesa, Nnueva, Mnuevo, CS).
+    
+quedanCartas(Game, 0, _, Game).
+
+quedanCartas(Game, 1, _, Game).
+
+quedanCartas(Game, N, CS, GameOut) :-
+    N1 is N - 1,
+    N2 is N - 2,
+    obtenerElemento(CS, N1, C1),
+    obtenerElemento(CS, N2, C2),
+    obtenerElemento(Game, 3, Mesa),
+    obtenerElemento(Game, 0, Game2),
+    eliminarLista(N1, CS, CS2),
+    eliminarLista(N2, CS2, CS3),
+    eliminarLista(1, Game2, Game3),
+    insertar(CS3, Game3, 2, Game4),
+    eliminarLista(0, Game, GameAnt),
+    insertar(Game4, GameAnt, 1, GameAct),
+    agregarFinal(Mesa, C1, M2),
+    agregarFinal(M2, C2, Cartas),
+    eliminarLista(3, GameAct, G1),
+    insertar(Cartas, G1, 4, GameOut).
+
+% FUNCIÓN 10
+
+dobbleGameStatus(Game, Status).
+
+% FUNCIÓN 11
+
+dobbleGameScore(Game, Username, Score).
+    
 % EJEMPLOS (PRONTO SE AGREGARÁN EJEMPLOS)
 
 % cardsSet: cardsSet([a,b,c,d,e,f,g,h,i,j,k,l], 3, 3, 92175, CS)
