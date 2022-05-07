@@ -3,9 +3,11 @@
 % TDA CARDSSET
 cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     getElements([Elements, NumC, MaxC, Seed], 0, D1),
+    eliminaDuplicados(D1, R),
+    rnd_permu(R, R1),
     getNumC([Elements, NumC, MaxC, Seed], 1, D2),
     getMaxC([Elements, NumC, MaxC, Seed], 2, D3),
-    acortarListaElementos(D1, D2, LE),
+    acortarListaElementos(R1, D2, LE),
     D4 is D2 - 1,
     firstCard(LE, D4, [], C1),
     agregarMazo([], C1, C2),
@@ -13,8 +15,20 @@ cardsSet(Elements, NumC, MaxC, Seed, CS) :-
     nextCards(LE, D2, 0, [], 1, 0, D5, [], C3),
     append(C2, C3, C4),
     lastCards(LE, D4, 0, [], 0, 0, 0, D4, [], C5),
-    append(C4, C5, CS).
+    append(C4, C5, C6),
+    seleccionaCartas(C6, D3, CS), !.
 
+seleccionaCartas(Lista, D3, CS) :-
+    maxCartas(Lista, D3, 0, [], CS).
+
+maxCartas(_, N, N, Aux, Aux).
+
+maxCartas(Lista, N, X, Aux, CS) :-
+    obtenerElemento(Lista, X, Carta),
+    agregarFinal(Aux, Carta, Mazo),
+    X1 is X + 1,
+    maxCartas(Lista, N, X1, Mazo, CS).
+    
 firstCard(0, 0, ListaCa, ListaCa).
 
 firstCard(Lista, 0, ListaCa, CartaInicial) :-
@@ -72,6 +86,23 @@ lastCards(Lista, Num, Aux, ListaCa, J, K, I, X, Carta, Mazo) :-
     Knueva is K + 1,
     Aux2 is (Num + 1 + Num * Knueva + (I * Knueva + J) mod Num),
     lastCards(Lista, Num, Aux2, XD, J, Knueva, I, X, Carta, Mazo), !.
+
+remove_at(X,[X|Xs],1,Xs).
+
+remove_at(X,[Y|Xs],K,[Y|Ys]) :- K > 1, 
+   K1 is K - 1, remove_at(X,Xs,K1,Ys).
+
+rnd_select(_,0,[]).
+
+rnd_select(Xs,N,[X|Zs]) :- N > 0,
+    length(Xs,L),
+    I is random(L) + 1,
+    remove_at(X,Xs,I,Ys),
+    N1 is N - 1,
+    rnd_select(Ys,N1,Zs).
+
+rnd_permu(L1,L2) :- 
+    length(L1,N), rnd_select(L1,N,L2).
 
 agregarMazo(Lista, Carta, Mazo) :-
     agregarFinal(Lista, Carta, Mazo).
@@ -291,10 +322,11 @@ stringCartas(CardsSet, N, X, StringAux, String) :-
 dobbleGame(NumPlayers, CS, Mode, Seed, Game) :-
     getNumPlayers([NumPlayers, CS, Mode, Seed], D1),
     getCS([NumPlayers, CS, Mode, Seed], D2),
+    rnd_permu(D2, R1),
     getMode([NumPlayers, CS, Mode, Seed], D3),
     getSeed2([NumPlayers, CS, Mode, Seed], D4),
     agregarFinal([], D1, L1),
-    agregarFinal(L1, D2, L2),
+    agregarFinal(L1, R1, L2),
     agregarFinal(L2, D3, L3),
     agregarFinal(L3, D4, L4),
     append([L4], [[]], L5),
@@ -555,7 +587,7 @@ verificaTurno(Game, Cant, Cant, GameOut) :-
     agregarFinal([], 0, TurnoAct),
     insertar(TurnoAct, Game2, 3, GameOut).
 
-verificaTurno(Game, Cant, Turno, GameOut) :-
+verificaTurno(Game, _, Turno, GameOut) :-
     obtenerElemento(Game, 2, Dato),
     obtenerElemento(Dato, 0, Turno),
     TurnoNuevo is Turno + 1,
@@ -673,7 +705,7 @@ verificarRegistro(Jugadores, UserAtom, N, X, _, Score) :-
     stringAtom(Jugador, UserAtom2),
     ((UserAtom == UserAtom2, verificarRegistro(Jugadores, UserAtom, N, N, 1, Score)) ;
     (UserAtom \== UserAtom2, X1 is X + 1, verificarRegistro(Jugadores, UserAtom, N, X1, 0, Score))).
-    
+
 % EJEMPLOS (PRONTO SE AGREGARÁN EJEMPLOS)
 
 % cardsSet: cardsSet([a,b,c,d,e,f,g,h,i,j,k,l], 3, 3, 92175, CS)
